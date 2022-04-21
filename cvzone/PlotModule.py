@@ -5,7 +5,7 @@ import math
 
 
 class LivePlot:
-    def __init__(self, w=640, h=480, yLimit=[0, 100],
+    def __init__(self, w=640, h=480, yLimit=[0, 100], multi_line = 2,
                  interval=0.001, invert=False, char=' '):
 
         self.yLimit = yLimit
@@ -22,14 +22,17 @@ class LivePlot:
                       (0, 0, 0), cv2.FILLED)
         self.xP = 0
         self.yP = 0
-
-        self.yList = []
+        self.y_list_dictionary = {}
+        for index in range(multi_line):
+            self.y_list_dictionary[index] = []
+            # self.y_list_dictionary[id] = []
 
         self.xList = [x for x in range(0, 100)]
         self.ptime = 0
 
-    def update(self, y, color=(255, 0, 255)):
-
+    def update(self, y, id, color=(255, 0, 255)):
+        if id == 1:
+            color=(0, 0, 255)
         if time.time() - self.ptime > self.interval:
 
             # Refresh
@@ -46,18 +49,19 @@ class LivePlot:
             else:
                 self.yP = int(np.interp(y, self.yLimit,
                                         [0, self.h]))
-            self.yList.append(self.yP)
-            if len(self.yList) == 100:
-                self.yList.pop(0)
-
-            for i in range(0, len(self.yList)):
-                if i < 2:
-                    pass
-                else:
-                    cv2.line(self.imgPlot, (int((self.xList[i - 1] * (self.w // 100))) - (self.w // 10),
-                                            self.yList[i - 1]),
-                             (int((self.xList[i] * (self.w // 100)) - (self.w // 10)),
-                              self.yList[i]), color, 2)
+            self.y_list_dictionary[id].append(self.yP)
+            # self.y_list_dictionary[id].append(self.yP)
+            if len(self.y_list_dictionary[id]) == 100:
+                self.y_list_dictionary[id].pop(0)
+            for key, value in self.y_list_dictionary.items():
+                for i in range(0, len(value)):
+                    if i < 2:
+                        pass
+                    else:
+                        cv2.line(self.imgPlot, (int((self.xList[i - 1] * (self.w // 100))) - (self.w // 10),
+                                                value[i - 1]),
+                                (int((self.xList[i] * (self.w // 100)) - (self.w // 10)),
+                                value[i]), color, 2)
             self.ptime = time.time()
 
         return self.imgPlot
@@ -96,12 +100,12 @@ def main():
 
         x += 1
         if x == 360: x = 0
-        imgPlot = xPlot.update(int(math.sin(math.radians(x)) * 100))
+        imgPlot = xPlot.update(int(math.sin(math.radians(x)) * 100),0)
 
         cv2.imshow("Image", imgPlot)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
