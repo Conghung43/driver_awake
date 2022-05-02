@@ -30,19 +30,14 @@ class LivePlot:
         self.xList = [x for x in range(0, 100)]
         self.ptime = 0
 
-    def update(self, y, id, color=(255, 0, 255)):
-        if id == 1:
-            color=(0, 0, 255)
+    def update(self, y, id):
+
         if time.time() - self.ptime > self.interval:
 
             # Refresh
             self.imgPlot[:] = 225, 225, 225
             # Draw Static Parts
             self.drawBackground()
-            # Draw the text value
-            cv2.putText(self.imgPlot, str(y),
-                        (self.w - (125), 50), cv2.FONT_HERSHEY_PLAIN,
-                        3, (150, 150, 150), 3)
             if self.invert:
                 self.yP = int(np.interp(y, self.yLimit,
                                         [self.h, 0]))
@@ -54,6 +49,17 @@ class LivePlot:
             if len(self.y_list_dictionary[id]) == 100:
                 self.y_list_dictionary[id].pop(0)
             for key, value in self.y_list_dictionary.items():
+                current_y = ((self.yP/self.h)*(self.yLimit[1]-self.yLimit[0])) + self.yLimit[0]
+                if key == 0:
+                    color=(0, 0, 255)
+                    cv2.putText(self.imgPlot, str(round(current_y,1)),
+                                (self.w - (125), 50), cv2.FONT_HERSHEY_PLAIN,
+                                3, color, 3)
+                else:
+                    color=(255, 0, 255)
+                    cv2.putText(self.imgPlot, str(round(current_y,1)),
+                                (125, 50), cv2.FONT_HERSHEY_PLAIN,
+                                3, color, 3)
                 for i in range(0, len(value)):
                     if i < 2:
                         pass
